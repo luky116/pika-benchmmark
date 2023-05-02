@@ -15,6 +15,7 @@ import (
 var (
 	host        string
 	port        int64
+	auth        string
 	keyPrefix   string
 	commandsStr string
 	commands    []string
@@ -43,6 +44,7 @@ func main() {
 
 	flag.StringVar(&host, "h", "127.0.0.1", "redis host")
 	flag.Int64Var(&port, "p", 6379, "redis port")
+	flag.StringVar(&auth, "a", "", "redis passwod")
 	flag.StringVar(&keyPrefix, "prefix", fmt.Sprintf("%s_%s_", now.Format("20060102150405"), uuid.New().String()[0:5]), "redis key prefix")
 	flag.StringVar(&commandsStr, "c", "SET", "redis command")
 	flag.Int64Var(&parallel, "parallel", 1, "parallel nums")
@@ -132,7 +134,7 @@ func startClient(no int64, def func(no int64, err error)) (err error) {
 		now  = time.Now()
 	)
 
-	conn, err = redis.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+	conn, err = redis.Dial("tcp", fmt.Sprintf("%s:%d", host, port), redis.DialPassword(auth))
 	if err != nil {
 		log.Fatalf("【%s】redis.Dial err = %v, param=%s", batchName, err, paramStr())
 		return
