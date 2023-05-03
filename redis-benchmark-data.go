@@ -32,8 +32,11 @@ var (
 
 var (
 	exeMap = map[string]func(no int64, conn redis.Conn) error{
-		"SET":  execSet,
-		"HSET": execHSet,
+		"SET":   execSet,
+		"HSET":  execHSet,
+		"LPUSH": execLPush,
+		"ZADD":  execZAdd,
+		"SADD":  execSAdd,
 	}
 )
 
@@ -201,14 +204,53 @@ func since(beg time.Time) string {
 	return sin.String()
 }
 
-//func execLPush(no int64) error {
-//	for i := int64(0); i < num; i++ {
-//		_, err := conn.Do("LPush", fmt.Sprintf("%s_%d", keyPrefix, i), keyValue, 1, 2, 3)
-//		if err != nil {
-//			log.Printf("【%s】【goroutine %d】 startClient LPush failed, num = %d, err = %v", batchName, no, num, err)
-//			return err
-//		}
-//	}
-//	log.Printf("【%s】【goroutine %d】 startClient LPush done, num = %d", batchName, no, num)
-//	return nil
-//}
+func execLPush(no int64, conn redis.Conn) error {
+	beg := time.Now()
+	for i := int64(0); i < num; i++ {
+		key := fmt.Sprintf("%s_%d_%d_lpush", keyPrefix, no, i)
+		_, err := conn.Do("LPush", key, keyValue, 1, 2, 3)
+		if err != nil {
+			log.Printf("【%s】【goroutine %d】 startClient LPush failed, num = %d, err = %v", batchName, no, num, err)
+			return err
+		}
+		if i%50000 == 0 {
+			log.Printf("【%s】【goroutine %d】 executing LPush, executed nums = %d, key = %s, costs = %s", batchName, no, i, key, since(beg))
+		}
+	}
+	log.Printf("【%s】【goroutine %d】 startClient LPush done, num = %d", batchName, no, num)
+	return nil
+}
+
+func execSAdd(no int64, conn redis.Conn) error {
+	beg := time.Now()
+	for i := int64(0); i < num; i++ {
+		key := fmt.Sprintf("%s_%d_%d_sadd", keyPrefix, no, i)
+		_, err := conn.Do("SADD", key, keyValue, 1, 2, 3)
+		if err != nil {
+			log.Printf("【%s】【goroutine %d】 startClient SADD failed, num = %d, err = %v", batchName, no, num, err)
+			return err
+		}
+		if i%50000 == 0 {
+			log.Printf("【%s】【goroutine %d】 executing SADD, executed nums = %d, key = %s, costs = %s", batchName, no, i, key, since(beg))
+		}
+	}
+	log.Printf("【%s】【goroutine %d】 startClient SADD done, num = %d", batchName, no, num)
+	return nil
+}
+
+func execZAdd(no int64, conn redis.Conn) error {
+	beg := time.Now()
+	for i := int64(0); i < num; i++ {
+		key := fmt.Sprintf("%s_%d_%d_zadd", keyPrefix, no, i)
+		_, err := conn.Do("ZADD", key, 1, keyValue)
+		if err != nil {
+			log.Printf("【%s】【goroutine %d】 startClient ZAdd failed, num = %d, err = %v", batchName, no, num, err)
+			return err
+		}
+		if i%50000 == 0 {
+			log.Printf("【%s】【goroutine %d】 executing ZAdd, executed nums = %d, key = %s, costs = %s", batchName, no, i, key, since(beg))
+		}
+	}
+	log.Printf("【%s】【goroutine %d】 startClient ZAdd done, num = %d", batchName, no, num)
+	return nil
+}
