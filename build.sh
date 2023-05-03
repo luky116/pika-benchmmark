@@ -1,1 +1,1 @@
-go build -o gen-benchmark-data
+go build -o benchmark-data
