@@ -168,7 +168,7 @@ func execSet(no int64, conn redis.Conn) error {
 			log.Printf("【%s】【goroutine %d】 exec Set failed, num = %d, err = %v", batchName, no, num, err)
 			return err
 		}
-		if i%1000 == 0 {
+		if i%50000 == 0 {
 			end := time.Now().Second()
 			log.Printf("【%s】【goroutine %d】 executing Set, executed nums = %d, key = %s, costs = %d", batchName, no, i, key, end-beg)
 		}
@@ -186,7 +186,7 @@ func execHSet(no int64, conn redis.Conn) error {
 			log.Printf("【%s】【goroutine %d】 exec HSet failed, num = %d, err = %v", batchName, no, num, err)
 			return err
 		}
-		if i%1000 == 0 {
+		if i%50000 == 0 {
 			end := time.Now().Second()
 			log.Printf("【%s】【goroutine %d】 executing HSet, executed nums = %d, key = %s, subKey = %d, costs = %d", batchName, no, i, key, i, end-beg)
 		}
