@@ -106,6 +106,7 @@ func checkPrams() {
 func paramStr() string {
 	var sb strings.Builder
 	sb.WriteString("   ==============   ")
+	sb.WriteString("batchName=" + batchName + " || ")
 	sb.WriteString("host=" + host + " || ")
 	sb.WriteString("post=" + strconv.FormatInt(port, 10) + " || ")
 	sb.WriteString("keyPrefix=" + keyPrefix + " || ")
