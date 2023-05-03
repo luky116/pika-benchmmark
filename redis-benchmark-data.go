@@ -91,21 +91,12 @@ func checkPrams() {
 		assert(ok, "commands should be one of HSET, SET, LPUSH, SADD or ZADD")
 	}
 
-	assert(parallel > 0 && parallel <= 100, "parallel should be 1~`100`")
+	assert(parallel > 0 && parallel <= 100, "parallel should be 1~100")
 	assert(num > 0, "num should be gt 0")
 	assert(valLen > 0, "len should be gt 0")
 	assert(keyFrom > 0, "keyFrom should be gt 0")
 }
 
-//host        string
-//port        int64
-//keyPrefix   string
-//commandsStr string
-//commands    []string
-//parallel    int64
-//num         int64
-//valLen      int64
-//keyFrom     int64
 func paramStr() string {
 	var sb strings.Builder
 	sb.WriteString("   ==============   ")
@@ -158,8 +149,6 @@ func startClient(no int64, def func(no int64, err error)) (err error) {
 	return
 }
 
-//assert(ok, "commands should be one of HSET, SET, LPUSH, SADD or ZADD")
-
 func execSet(no int64, conn redis.Conn) error {
 	beg := time.Now()
 	for i := keyFrom; i < num+keyFrom; i++ {
@@ -200,7 +189,7 @@ func since(beg time.Time) string {
 	sin.WriteString(fmt.Sprintf("【%d mills, ", dur.Milliseconds()))
 	sin.WriteString(fmt.Sprintf(" %f seconds, ", dur.Seconds()))
 	sin.WriteString(fmt.Sprintf(" %f minutes, ", dur.Minutes()))
-	sin.WriteString(fmt.Sprintf(" %f hours】, ", dur.Hours()))
+	sin.WriteString(fmt.Sprintf(" %f hours】", dur.Hours()))
 	return sin.String()
 }
 
