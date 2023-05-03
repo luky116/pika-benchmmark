@@ -67,17 +67,15 @@ func main() {
 	var wg sync.WaitGroup
 	for i := int64(0); i < parallel; i++ {
 		wg.Add(1)
-		beg := time.Now().Second()
+		beg := time.Now()
 		go startClient(i, func(no int64, err error) {
-			end := time.Now().Second()
-			log.Printf("【%s】【goroutine %d】 startClient done, costs %d seconds, err = %v", batchName, no, end-beg, err)
+			log.Printf("【%s】【goroutine %d】 startClient done, costs = %s seconds, err = %v", batchName, no, since(beg), err)
 			wg.Done()
 		})
 	}
 	wg.Wait()
 
-	end := time.Now().Second()
-	log.Printf("【%s】end to exec! param = %s, costs %d", batchName, paramStr(), end-now.Second())
+	log.Printf("【%s】end to exec! param = %s, costs = %s", batchName, paramStr(), since(now))
 }
 
 func checkPrams() {
@@ -141,8 +139,7 @@ func startClient(no int64, def func(no int64, err error)) (err error) {
 	}
 	defer func() {
 		conn.Close() // 关闭
-		end := time.Now().Second()
-		log.Printf("【%s】%d client all done, costs %d seconds, err=%v", batchName, no, end-now.Second(), err)
+		log.Printf("【%s】%d client all done, costs = %s , err=%v", batchName, no, since(now), err)
 	}()
 
 	for _, command := range commands {
@@ -160,7 +157,7 @@ func startClient(no int64, def func(no int64, err error)) (err error) {
 //assert(ok, "commands should be one of HSET, SET, LPUSH, SADD or ZADD")
 
 func execSet(no int64, conn redis.Conn) error {
-	beg := time.Now().Second()
+	beg := time.Now()
 	for i := keyFrom; i < num+keyFrom; i++ {
 		key := fmt.Sprintf("%s_%d_%d_set", keyPrefix, no, i)
 		_, err := conn.Do("Set", key, keyValue)
@@ -169,8 +166,7 @@ func execSet(no int64, conn redis.Conn) error {
 			return err
 		}
 		if i%50000 == 0 {
-			end := time.Now().Second()
-			log.Printf("【%s】【goroutine %d】 executing Set, executed nums = %d, key = %s, costs = %d", batchName, no, i, key, end-beg)
+			log.Printf("【%s】【goroutine %d】 executing Set, executed nums = %d, key = %s, costs = %s", batchName, no, i, key, since(beg))
 		}
 	}
 	log.Printf("【%s】【goroutine %d】 exec Set done, num = %d", batchName, no, num)
@@ -178,7 +174,7 @@ func execSet(no int64, conn redis.Conn) error {
 }
 
 func execHSet(no int64, conn redis.Conn) error {
-	beg := time.Now().Second()
+	beg := time.Now()
 	for i := keyFrom; i < num+keyFrom; i++ {
 		key := fmt.Sprintf("%s_%d_%d_hset", keyPrefix, no, i)
 		_, err := conn.Do("HSet", key, i, keyValue)
@@ -187,13 +183,21 @@ func execHSet(no int64, conn redis.Conn) error {
 			return err
 		}
 		if i%50000 == 0 {
-			end := time.Now().Second()
-			log.Printf("【%s】【goroutine %d】 executing HSet, executed nums = %d, key = %s, subKey = %d, costs = %d", batchName, no, i, key, i, end-beg)
+			log.Printf("【%s】【goroutine %d】 executing HSet, executed nums = %d, key = %s, subKey = %d, costs = %s", batchName, no, i, key, i, since(beg))
 		}
 	}
-	end := time.Now().Second()
-	log.Printf("【%s】【goroutine %d】 exec HSet done, num = %d, costs = %d", batchName, no, num, end-beg)
+	log.Printf("【%s】【goroutine %d】 exec HSet done, num = %d, costs = %s", batchName, no, num, since(beg))
 	return nil
+}
+
+func since(beg time.Time) string {
+	dur := time.Since(beg)
+	var sin strings.Builder
+	sin.WriteString(fmt.Sprintf("【%d mills, ", dur.Milliseconds()))
+	sin.WriteString(fmt.Sprintf(" %f seconds, ", dur.Seconds()))
+	sin.WriteString(fmt.Sprintf(" %f minutes, ", dur.Minutes()))
+	sin.WriteString(fmt.Sprintf(" %f hours】, ", dur.Hours()))
+	return sin.String()
 }
 
 //func execLPush(no int64) error {
