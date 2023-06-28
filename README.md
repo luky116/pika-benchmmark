@@ -21,7 +21,7 @@ sh build.sh
 例如：
 
 ~~~
-./benchmark-data -h wredis24.add.zzdt.qihoo.net -p 19000 -a 123456 -c=SET,HSET,LPUSH,SADD,ZADD -parallel 20 -n 10000 -len 512 -key-from 1
+./benchmark-data -h xx.xx.xx -p 19000 -a 123456 -c=SET,HSET,LPUSH,SADD,ZADD -parallel 20 -n 10000 -len 512 -key-from 1
 ~~~
 
 
